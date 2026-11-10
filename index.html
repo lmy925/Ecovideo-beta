@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>EcoVideo++ — Video Results</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --navy: #2f4f7f;
+    --navy-deep: #1f3863;
+    --ink: #1c2026;
+    --muted: #6b717a;
+    --rule: #e3e6ea;
+    --tint: #f4f6f9;
+    --bg: #ffffff;
+    --serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #f5f5f5; }
+  body {
+    display: flex; justify-content: center;
+    font-family: var(--serif); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { width: 100%; max-width: 1100px; background: var(--bg); padding: 64px 80px 80px; }
+  h1 {
+    font-weight: 600; font-size: 52px; line-height: 1.08;
+    text-align: center; margin: 0 0 8px; letter-spacing: -0.5px;
+  }
+  .subtitle {
+    font-weight: 500; font-style: italic; font-size: 26px; line-height: 1.25;
+    text-align: center; color: var(--navy-deep); margin: 0 0 32px;
+  }
+  .authors { text-align: center; font-size: 19px; line-height: 1.7; margin-bottom: 48px; }
+  .authors span { font-size: 16px; color: var(--muted); }
+  .section-title {
+    font-size: 24px; font-weight: 600; margin: 0;
+    padding-bottom: 10px; border-bottom: 1px solid var(--rule);
+  }
+  .section-desc { font-size: 17px; line-height: 1.6; color: var(--muted); margin: 12px 0 20px; }
+  .setup {
+    background: var(--tint); border: 1px solid var(--rule); border-radius: 8px;
+    padding: 18px 22px; margin: 0 0 56px;
+    display: grid; grid-template-columns: 1.4fr 1.2fr 1fr 1fr; gap: 12px 20px;
+  }
+  .setup div { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+  .setup b { display: block; font-family: var(--serif); font-size: 17px; font-weight: 600; color: var(--ink); margin-top: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 56px; }
+  .card { border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; background: var(--bg); }
+  video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; object-fit: cover; }
+  .caption { display: flex; gap: 8px; align-items: baseline; padding: 10px 14px; border-top: 1px solid var(--rule); }
+  .vid {
+    flex: none; font-family: var(--mono); font-size: 11px; color: var(--navy);
+    background: var(--tint); border: 1px solid var(--rule); border-radius: 4px; padding: 1px 6px;
+  }
+  .prompt { font-size: 14px; font-style: italic; line-height: 1.4; }
+
+  /* Per-prompt examples */
+  .example { margin-bottom: 40px; }
+  .example-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 12px; }
+  .example-head .label { font-family: var(--sans); font-size: 12px; letter-spacing: 0.5px; color: var(--muted); text-transform: uppercase; }
+  .example-head .prompt { font-size: 17px; }
+  .example-body { display: grid; grid-template-columns: 1.65fr 1fr; gap: 20px; align-items: start; }
+  table.scores { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 13px; }
+  table.scores th, table.scores td { padding: 6px 8px; border-bottom: 1px solid var(--rule); text-align: left; }
+  table.scores th { color: var(--muted); font-weight: 500; }
+  table.scores td.num, table.scores th.num { text-align: right; font-family: var(--mono); }
+  table.scores tr.total td { font-weight: 600; border-top: 1px solid var(--ink); }
+
+  .card.ours { border: 2px solid var(--navy); }
+  .card.ours .method { color: var(--navy); font-weight: 600; }
+  .method { font-family: var(--sans); font-size: 13px; color: var(--muted); }
+  .note { padding: 0 14px 12px; font-family: var(--sans); font-size: 13px; line-height: 1.5; color: var(--muted); }
+  .example .grid { margin-bottom: 0; }
+  .example { margin-bottom: 44px; }
+  /* Comparison: one scrollable row of six videos */
+  .compare { margin-bottom: 56px; }
+  .compare .example { margin-bottom: 18px; }
+  .compare .example-head { margin-bottom: 6px; }
+  .row-scroll {
+    display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 12px) / 3);
+    gap: 6px; overflow-x: auto; scroll-snap-type: x mandatory;
+    padding-bottom: 8px; scrollbar-width: thin;
+  }
+  .row-scroll .card { scroll-snap-align: start; border-radius: 4px; }
+  .row-scroll .caption { padding: 5px 10px; }
+  .row-scroll::-webkit-scrollbar { height: 6px; }
+  .row-scroll::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 3px; }
+  .table-wrap { overflow-x: auto; margin: 0 0 56px; border: 1px solid var(--rule); border-radius: 8px; }
+  table.config { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 13.5px; }
+  table.config th, table.config td { padding: 9px 12px; text-align: center; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  table.config th { background: var(--tint); color: var(--muted); font-weight: 600; }
+  table.config td:first-child, table.config th:first-child { text-align: left; font-family: var(--serif); font-size: 15px; color: var(--ink); }
+  table.config tbody tr:last-child td { border-bottom: none; }
+  /* Figures and abstract */
+  .figure {
+    border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; background: var(--bg);
+    margin: 20px 0 14px; padding: 18px 20px;
+    display: flex; justify-content: center; align-items: center;
+  }
+  .figure img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  .fig-caption { font-size: 16px; line-height: 1.6; color: var(--muted); font-style: italic; text-align: center; margin: 0 0 56px; }
+  .abstract { font-size: 18px; line-height: 1.65; margin: 16px 0 56px; text-align: justify; }
+
+  .footer {
+    margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--rule);
+    font-family: var(--sans); font-size: 13px; color: var(--muted); text-align: center;
+  }
+  @media (max-width: 900px) {
+    .row-scroll { grid-auto-columns: 80%; }
+    .page { padding: 40px 20px 56px; }
+    h1 { font-size: 36px; }
+    .subtitle { font-size: 20px; }
+    .grid, .example-body { grid-template-columns: 1fr; }
+    .setup { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <h1>EcoVideo++</h1>
+  <p class="subtitle">Characterizing and Exploiting Tri-dimensional Capability Boundaries<br>for Collaborative Video Diffusion</p>
+  <div class="authors">
+    Anonymous Authors<br>
+    <span>Paper under double-blind review</span>
+  </div>
+
+  <h3 class="section-title">Abstract</h3>
+  <p class="abstract">
+    Diffusion Transformers (DiTs) achieve strong video generation quality but incur substantial inference costs
+    due to repeated processing of dense spatiotemporal tokens. Existing large–small model collaboration methods
+    reduce this cost by assigning different denoising stages to models of different capacities, while still
+    treating the entire video uniformly at each step. We observe that the capability difference between large
+    and small DiTs is highly non-uniform not only along the denoising trajectory, but also across temporal
+    segments and spatial regions. Based on this observation, we propose <strong>EcoVideo++</strong>, a
+    training-free hierarchical capacity orchestration framework that progressively allocates large-model
+    computation at step, temporal, and spatial levels. The small model provides global predictions, while the
+    large model selectively refines difficult regions with preserved spatiotemporal context and smooth
+    prediction fusion. Experiments on Wan2.1, Wan2.2, and CogVideoX demonstrate that EcoVideo++ achieves
+    2.29–2.93× speedup while keeping VBench within 0.0027 of the corresponding large-only models.
+  </p>
+
+  <h3 class="section-title">Method</h3>
+  <div class="figure">
+    <img src="figures/pipeline.jpg" alt="Tri-dimensional collaborative video diffusion framework of EcoVideo++.">
+  </div>
+  <p class="fig-caption">
+    Tri-dimensional collaborative video diffusion framework. The large model first denoises the full video and
+    adaptively switches to joint denoising once the clean-latent estimate is stable (Semantics Depth). During joint
+    denoising, the small model predicts the full video, while the large model processes context crops of the
+    selected temporal segments (Temporal Coverage) and spatial cores (Spatial Objects); the predictions are smoothly
+    fused before each scheduler update.
+  </p>
+
+  <h3 class="section-title">Setup</h3>
+  <p class="section-desc">
+    Generation settings of the three model pairs. All videos on this page are generated with Wan2.1-14B + Wan2.1-1.3B
+    (one video per prompt, seed 0) and are full, uncut outputs re-encoded with H.264 for web playback.
+    Baseline videos use the same model pair and prompts.
+  </p>
+  <div class="table-wrap">
+    <table class="config">
+      <thead>
+        <tr>
+          <th>Model pair</th><th>Frames</th><th>FPS</th><th>Duration</th>
+          <th>Resolution (W × H)</th><th>Guidance scale</th><th>Inference steps</th><th>τ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Wan2.1-14B + Wan2.1-1.3B</td><td>81</td><td>16</td><td>5 s</td><td>1280 × 720</td><td>5.0</td><td>50</td><td>0.15</td></tr>
+        <tr><td>Wan2.2-T2V-A14B + Wan2.1-1.3B</td><td>81</td><td>16</td><td>5 s</td><td>1280 × 720</td><td>(3.0, 4.0)</td><td>40</td><td>0.15</td></tr>
+        <tr><td>CogVideoX-5B + CogVideoX-2B</td><td>49</td><td>8</td><td>6 s</td><td>720 × 480</td><td>6.0</td><td>50</td><td>0.15</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="section-title">Qualitative Results</h3>
+  <p class="section-desc">Full videos generated by EcoVideo++.</p>
+  <div class="grid">
+      <div class="card ">
+        <video src="videos/ours/drinking_coffee.mp4" poster="posters/ours/drinking_coffee.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A person drinking coffee in a cafe.”</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/ours/cow_elephant.mp4" poster="posters/ours/cow_elephant.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A cow and an elephant.”</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/ours/tasting_beer.mp4" poster="posters/ours/tasting_beer.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A person is tasting beer.”</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/ours/motorcycle_snow.mp4" poster="posters/ours/motorcycle_snow.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A motorcycle gliding through a snowy field.”</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/ours/teddy_drum.mp4" poster="posters/ours/teddy_drum.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A teddy bear is playing drum kit in NYC Times Square.”</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/ours/classroom.mp4" poster="posters/ours/classroom.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“Classroom.”</span></div>
+      </div>
+  </div>
+
+  <h3 class="section-title">Comparison with Baselines</h3>
+  <p class="section-desc">Large-only inference, collaborative baselines, and EcoVideo++ on the same prompt. Scroll horizontally to see all six methods.</p>
+  <div class="compare">
+  <div class="example">
+    <div class="example-head"><span class="label">Prompt 1</span><span class="prompt">“A horse on the right of a sheep, front view.”</span></div>
+    <div class="row-scroll">
+      <div class="card ">
+        <video src="videos/compare/horse_large.mp4" poster="posters/compare/horse_large.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">Large-only</span></div>
+      </div>
+      <div class="card ours">
+        <video src="videos/compare/horse_ours.mp4" poster="posters/compare/horse_ours.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EcoVideo++ (Ours)</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/horse_tstitch.mp4" poster="posters/compare/horse_tstitch.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">T-Stitch</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/horse_hybridsd.mp4" poster="posters/compare/horse_hybridsd.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">HybridSD</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/horse_srdiffusion.mp4" poster="posters/compare/horse_srdiffusion.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">SRDiffusion</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/horse_ecdiff.mp4" poster="posters/compare/horse_ecdiff.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EC-Diff</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="example-head"><span class="label">Prompt 2</span><span class="prompt">“A person is planting trees.”</span></div>
+    <div class="row-scroll">
+      <div class="card ">
+        <video src="videos/compare/planting_large.mp4" poster="posters/compare/planting_large.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">Large-only</span></div>
+      </div>
+      <div class="card ours">
+        <video src="videos/compare/planting_ours.mp4" poster="posters/compare/planting_ours.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EcoVideo++ (Ours)</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/planting_tstitch.mp4" poster="posters/compare/planting_tstitch.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">T-Stitch</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/planting_hybridsd.mp4" poster="posters/compare/planting_hybridsd.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">HybridSD</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/planting_srdiffusion.mp4" poster="posters/compare/planting_srdiffusion.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">SRDiffusion</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/planting_ecdiff.mp4" poster="posters/compare/planting_ecdiff.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EC-Diff</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="example-head"><span class="label">Prompt 3</span><span class="prompt">“A motorcycle on the left of a bus, front view.”</span></div>
+    <div class="row-scroll">
+      <div class="card ">
+        <video src="videos/compare/bus_large.mp4" poster="posters/compare/bus_large.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">Large-only</span></div>
+      </div>
+      <div class="card ours">
+        <video src="videos/compare/bus_ours.mp4" poster="posters/compare/bus_ours.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EcoVideo++ (Ours)</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/bus_tstitch.mp4" poster="posters/compare/bus_tstitch.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">T-Stitch</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/bus_hybridsd.mp4" poster="posters/compare/bus_hybridsd.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">HybridSD</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/bus_srdiffusion.mp4" poster="posters/compare/bus_srdiffusion.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">SRDiffusion</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/bus_ecdiff.mp4" poster="posters/compare/bus_ecdiff.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EC-Diff</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="example">
+    <div class="example-head"><span class="label">Prompt 4</span><span class="prompt">“A person is playing trumpet.”</span></div>
+    <div class="row-scroll">
+      <div class="card ">
+        <video src="videos/compare/trumpet_large.mp4" poster="posters/compare/trumpet_large.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">Large-only</span></div>
+      </div>
+      <div class="card ours">
+        <video src="videos/compare/trumpet_ours.mp4" poster="posters/compare/trumpet_ours.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EcoVideo++ (Ours)</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/trumpet_tstitch.mp4" poster="posters/compare/trumpet_tstitch.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">T-Stitch</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/trumpet_hybridsd.mp4" poster="posters/compare/trumpet_hybridsd.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">HybridSD</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/trumpet_srdiffusion.mp4" poster="posters/compare/trumpet_srdiffusion.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">SRDiffusion</span></div>
+      </div>
+      <div class="card ">
+        <video src="videos/compare/trumpet_ecdiff.mp4" poster="posters/compare/trumpet_ecdiff.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="method">EC-Diff</span></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <h3 class="section-title">Failure Cases</h3>
+  <p class="section-desc">Examples where EcoVideo++ produces unsatisfactory results.</p>
+  <div class="grid">
+      <div class="card">
+        <video src="videos/failure/marching.mp4" poster="posters/failure/marching.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A person is marching.”</span></div>
+        <div class="note">The subject walks alone in place rather than marching, and the leg motion is unclear.</div>
+      </div>
+      <div class="card">
+        <video src="videos/failure/sweeping_floor.mp4" poster="posters/failure/sweeping_floor.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A person is sweeping floor.”</span></div>
+        <div class="note">The hand–broom contact is unstable across frames under strong backlighting.</div>
+      </div>
+      <div class="card">
+        <video src="videos/failure/green_bicycle.mp4" poster="posters/failure/green_bicycle.jpg" muted loop playsinline controls preload="metadata"></video>
+        <div class="caption"><span class="prompt">“A green bicycle.”</span></div>
+        <div class="note">An unrequested person dominates the scene, and the hand merges with the handlebar.</div>
+      </div>
+  </div>
+
+  <div class="footer">
+    Anonymous supplementary page for double-blind review. Videos play automatically when scrolled into view.
+  </div>
+</main>
+
+<script>
+  (function () {
+    var videos = document.querySelectorAll("video");
+    if (!("IntersectionObserver" in window)) {
+      videos.forEach(function (v) { v.play().catch(function () {}); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.play().catch(function () {}); }
+        else { e.target.pause(); }
+      });
+    }, { threshold: 0.25 });
+    videos.forEach(function (v) { io.observe(v); });
+  })();
+</script>
+</body>
+</html>
